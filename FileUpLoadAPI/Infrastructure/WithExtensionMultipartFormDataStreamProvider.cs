@@ -17,7 +17,9 @@ namespace FileUpLoadAPI.Infrastructure
         public override string GetLocalFileName(System.Net.Http.Headers.HttpContentHeaders headers)
         {
             string extension = !string.IsNullOrWhiteSpace(headers.ContentDisposition.FileName) ? Path.GetExtension(GetValidFileName(headers.ContentDisposition.FileName)) : "";
-            return Guid.NewGuid().ToString() + extension;
+            string FileName = !string.IsNullOrWhiteSpace(headers.ContentDisposition.FileName) ? Path.GetFileName(GetValidFileName(headers.ContentDisposition.FileName)) : "";
+            //return Guid.NewGuid().ToString() + extension;
+            return FileName;
         }
 
         private string GetValidFileName(string filePath)
