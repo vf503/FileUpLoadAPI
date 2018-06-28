@@ -9,15 +9,17 @@ namespace FileUpLoadAPI.Infrastructure
 {
     public class WithExtensionMultipartFormDataStreamProvider : MultipartFormDataStreamProvider
     {
-        public WithExtensionMultipartFormDataStreamProvider(string rootPath)
+        public string FileName="";
+        public WithExtensionMultipartFormDataStreamProvider(string rootPath,string fileName)
             : base(rootPath)
         {
+            FileName = fileName;
         }
 
         public override string GetLocalFileName(System.Net.Http.Headers.HttpContentHeaders headers)
         {
-            string extension = !string.IsNullOrWhiteSpace(headers.ContentDisposition.FileName) ? Path.GetExtension(GetValidFileName(headers.ContentDisposition.FileName)) : "";
-            string FileName = !string.IsNullOrWhiteSpace(headers.ContentDisposition.FileName) ? Path.GetFileName(GetValidFileName(headers.ContentDisposition.FileName)) : "";
+            //string extension = !string.IsNullOrWhiteSpace(headers.ContentDisposition.FileName) ? Path.GetExtension(GetValidFileName(headers.ContentDisposition.FileName)) : "";
+            //string FileName = !string.IsNullOrWhiteSpace(headers.ContentDisposition.FileName) ? Path.GetFileName(GetValidFileName(headers.ContentDisposition.FileName)) : "";
             //return Guid.NewGuid().ToString() + extension;
             return FileName;
         }

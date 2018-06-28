@@ -69,7 +69,8 @@ namespace FileUpLoadAPI.Controllers
 
                 if (Request.Content.IsMimeMultipartContent()) //If the request is correct, the binary data will be extracted from content and IIS stores files in specified location.
                 {
-                    var streamProvider = new WithExtensionMultipartFormDataStreamProvider(uploadFolderPath);
+                    var context = System.Web.HttpContext.Current.Request;
+                    var streamProvider = new WithExtensionMultipartFormDataStreamProvider(uploadFolderPath, context["name"]);
                     var task = Request.Content.ReadAsMultipartAsync(streamProvider).ContinueWith<IQueryable<HDFile>>(t =>
                     {
                         if (t.IsFaulted || t.IsCanceled)
