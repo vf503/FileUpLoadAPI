@@ -22,6 +22,14 @@ namespace FileUpLoadAPI.Controllers
         
         private const string UploadFolder = "uploads";
 
+        public class PutModel
+        {
+            public string ProjectId { get; set; }
+            public string action { get; set; }
+            public string source { get; set; }
+            public string target { get; set; }
+        }
+
         public HttpResponseMessage Get(string fileName)
         {
             HttpResponseMessage result = null;
@@ -44,6 +52,38 @@ namespace FileUpLoadAPI.Controllers
                 result = new HttpResponseMessage(HttpStatusCode.NotFound);
             }
 
+            return result;
+        }
+
+        // Put访问路径 {域名}/api/ApiDemo/Put {参数实体类,要有一个id参数}
+        public HttpResponseMessage Put(int id, [FromBody]PutModel value)
+        {
+            HttpResponseMessage result = null;
+            var appSettings = ConfigurationManager.AppSettings;
+            string SourcePath = appSettings["CourseDirectory"]+ value.source;
+            string TargetPath = appSettings["CourseDirectory"]+ value.target;
+            if (value.action == "CourseVideoMove")
+            {
+                if (Directory.Exists(TargetPath))
+                {
+                    if (File.Exists(TargetPath + @"raw.mp4"))
+                    {
+                        File.Delete(TargetPath + @"raw.mp4");
+                    }
+                    if (File.Exists(TargetPath + @"rip.mp4"))
+                    {
+                        File.Delete(TargetPath + @"rip.mp4");
+                    }
+                }
+                else
+                {
+                    Directory.CreateDirectory(TargetPath);
+                }
+                File.Move(SourcePath+value.ProjectId+".mp4", TargetPath+"raw.mp4");
+                result = new HttpResponseMessage(HttpStatusCode.Accepted);
+                result.Content = new StringContent("成功", System.Text.Encoding.GetEncoding("UTF-8"), "application/json");
+            }
+            else { }
             return result;
         }
 
