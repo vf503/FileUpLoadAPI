@@ -17,7 +17,7 @@ namespace FileUpLoadAPI.Controllers
     {
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1", "value2" };
+            return new string[] { "value1", "value2","valueX" };
         }
         
         private const string UploadFolder = "uploads";
@@ -55,8 +55,7 @@ namespace FileUpLoadAPI.Controllers
             return result;
         }
 
-        // Put访问路径 {域名}/api/ApiDemo/Put {参数实体类,要有一个id参数}
-        public HttpResponseMessage Put(int id, [FromBody]PutModel value)
+        public HttpResponseMessage Post([FromBody]PutModel value)
         {
             HttpResponseMessage result = null;
             var appSettings = ConfigurationManager.AppSettings;
@@ -81,7 +80,7 @@ namespace FileUpLoadAPI.Controllers
                 }
                 File.Move(SourcePath+value.ProjectId+".mp4", TargetPath+"raw.mp4");
                 result = new HttpResponseMessage(HttpStatusCode.Accepted);
-                result.Content = new StringContent("成功", System.Text.Encoding.GetEncoding("UTF-8"), "application/json");
+                result.Content = new StringContent("文件上传成功", System.Text.Encoding.GetEncoding("UTF-8"), "text/html");
             }
             else { }
             return result;
