@@ -1,4 +1,5 @@
 ﻿using FileUpLoadAPI.Infrastructure;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Hosting;
 using System.Web.Http;
@@ -15,11 +17,6 @@ namespace FileUpLoadAPI.Controllers
 {
     public class FilesController : ApiController
     {
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2","valueX" };
-        }
-        
         private const string UploadFolder = "uploads";
 
         public class PutModel
@@ -30,6 +27,11 @@ namespace FileUpLoadAPI.Controllers
             public string target { get; set; }
         }
 
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2","valueX" };
+        }
+        
         public HttpResponseMessage Get(string fileName)
         {
             HttpResponseMessage result = null;
@@ -65,22 +67,60 @@ namespace FileUpLoadAPI.Controllers
             {
                 if (Directory.Exists(TargetPath))
                 {
-                    if (File.Exists(TargetPath + @"raw.mp4"))
-                    {
-                        File.Delete(TargetPath + @"raw.mp4");
-                    }
-                    if (File.Exists(TargetPath + @"rip.mp4"))
-                    {
-                        File.Delete(TargetPath + @"rip.mp4");
-                    }
+                    
                 }
                 else
                 {
                     Directory.CreateDirectory(TargetPath);
                 }
-                File.Move(SourcePath+value.ProjectId+".mp4", TargetPath+"raw.mp4");
+                StringBuilder sb = new StringBuilder();
+                StringWriter sw = new StringWriter(sb);
+                using (JsonWriter writer = new JsonTextWriter(sw))
+                {
+                    writer.Formatting = Formatting.Indented;
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("video");
+                    if (File.Exists(SourcePath + value.ProjectId + ".mp4"))
+                    {
+                        if (File.Exists(TargetPath + @"raw.mp4"))
+                        {
+                            File.Delete(TargetPath + @"raw.mp4");
+                        }
+                        if (File.Exists(TargetPath + @"rip.mp4"))
+                        {
+                            File.Delete(TargetPath + @"rip.mp4");
+                        }
+                        File.Move(SourcePath + value.ProjectId + ".mp4", TargetPath + "raw.mp4");
+                        writer.WriteValue("1"); 
+                    }
+                    else { writer.WriteValue("0"); }
+                    writer.WritePropertyName("pic");
+                    if (File.Exists(SourcePath + value.ProjectId + ".jpg"))
+                    {
+                        if (File.Exists(TargetPath + @"raw.jpg"))
+                        {
+                            File.Delete(TargetPath + @"raw.jpg");
+                        }
+                        File.Move(SourcePath + value.ProjectId + ".jpg", TargetPath + "raw.jpg");
+                        writer.WriteValue("1");
+                    }
+                    else { writer.WriteValue("0"); }
+                    writer.WritePropertyName("doc");
+                    if (File.Exists(SourcePath + value.ProjectId + ".zip"))
+                    {
+                        if (File.Exists(TargetPath + @"slide0.zip"))
+                        {
+                            File.Delete(TargetPath + @"slide0.zip");
+                        }
+                        File.Move(SourcePath + value.ProjectId + ".zip", TargetPath + "slide0.zip");
+                        writer.WriteValue("1");
+                    }
+                    else { writer.WriteValue("0"); }
+                    writer.WriteEnd();
+                    //writer.WriteEndObject();
+                }
                 result = new HttpResponseMessage(HttpStatusCode.Accepted);
-                result.Content = new StringContent("文件上传成功", System.Text.Encoding.GetEncoding("UTF-8"), "text/html");
+                result.Content = new StringContent(sb.ToString(), System.Text.Encoding.GetEncoding("UTF-8"), "application/json");
             }
             else { }
             return result;
