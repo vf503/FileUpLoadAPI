@@ -65,55 +65,54 @@ namespace FileUpLoadAPI.Controllers
             string TargetPath = appSettings["CourseDirectory"]+ value.target;
             if (value.action == "CourseVideoMove")
             {
-                if (Directory.Exists(TargetPath))
-                {
-                    
-                }
-                else
-                {
-                    Directory.CreateDirectory(TargetPath);
-                }
                 StringBuilder sb = new StringBuilder();
                 StringWriter sw = new StringWriter(sb);
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
                     writer.Formatting = Formatting.Indented;
                     writer.WriteStartObject();
+                    //video+pic
                     writer.WritePropertyName("video");
-                    if (File.Exists(SourcePath + value.ProjectId + ".mp4"))
+                    if (File.Exists(SourcePath + value.ProjectId + ".mp4") && File.Exists(SourcePath + value.ProjectId + ".jpg"))
                     {
-                        if (File.Exists(TargetPath + @"raw.mp4"))
+                        //建目录
+                        if (Directory.Exists(TargetPath))
                         {
-                            File.Delete(TargetPath + @"raw.mp4");
+                            if (File.Exists(TargetPath + @"raw.mp4"))
+                            {
+                                File.Delete(TargetPath + @"raw.mp4");
+                            }
+                            if (File.Exists(TargetPath + @"rip.mp4"))
+                            {
+                                File.Delete(TargetPath + @"rip.mp4");
+                            }
+                            if (File.Exists(TargetPath + @"raw.jpg"))
+                            {
+                                File.Delete(TargetPath + @"raw.jpg");
+                            }
                         }
-                        if (File.Exists(TargetPath + @"rip.mp4"))
+                        else
                         {
-                            File.Delete(TargetPath + @"rip.mp4");
+                            Directory.CreateDirectory(TargetPath);
                         }
                         File.Move(SourcePath + value.ProjectId + ".mp4", TargetPath + "raw.mp4");
-                        writer.WriteValue("1"); 
-                    }
-                    else { writer.WriteValue("0"); }
-                    writer.WritePropertyName("pic");
-                    if (File.Exists(SourcePath + value.ProjectId + ".jpg"))
-                    {
-                        if (File.Exists(TargetPath + @"raw.jpg"))
-                        {
-                            File.Delete(TargetPath + @"raw.jpg");
-                        }
+                        writer.WriteValue("1");
+                        //pic
+                        writer.WritePropertyName("pic");
                         File.Move(SourcePath + value.ProjectId + ".jpg", TargetPath + "raw.jpg");
                         writer.WriteValue("1");
-                    }
-                    else { writer.WriteValue("0"); }
-                    writer.WritePropertyName("doc");
-                    if (File.Exists(SourcePath + value.ProjectId + ".zip"))
-                    {
-                        if (File.Exists(TargetPath + @"slide0.zip"))
+                        //doc
+                        writer.WritePropertyName("doc");
+                        if (File.Exists(SourcePath + value.ProjectId + ".zip"))
                         {
-                            File.Delete(TargetPath + @"slide0.zip");
+                            if (File.Exists(TargetPath + @"slide0.zip"))
+                            {
+                                File.Delete(TargetPath + @"slide0.zip");
+                            }
+                            File.Move(SourcePath + value.ProjectId + ".zip", TargetPath + "slide0.zip");
+                            writer.WriteValue("1");
                         }
-                        File.Move(SourcePath + value.ProjectId + ".zip", TargetPath + "slide0.zip");
-                        writer.WriteValue("1");
+                        else { writer.WriteValue("0"); }
                     }
                     else { writer.WriteValue("0"); }
                     writer.WriteEnd();
@@ -121,6 +120,10 @@ namespace FileUpLoadAPI.Controllers
                 }
                 result = new HttpResponseMessage(HttpStatusCode.Accepted);
                 result.Content = new StringContent(sb.ToString(), System.Text.Encoding.GetEncoding("UTF-8"), "application/json");
+            }
+            else if (value.action == "CourseDirectoryRename")
+            {
+
             }
             else { }
             return result;
