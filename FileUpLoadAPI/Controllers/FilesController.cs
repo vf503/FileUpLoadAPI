@@ -121,6 +121,93 @@ namespace FileUpLoadAPI.Controllers
                 result = new HttpResponseMessage(HttpStatusCode.Accepted);
                 result.Content = new StringContent(sb.ToString(), System.Text.Encoding.GetEncoding("UTF-8"), "application/json");
             }
+            else if (value.action == "CourseFileCopy")
+            {
+                StringBuilder sb = new StringBuilder();
+                StringWriter sw = new StringWriter(sb);
+                using (JsonWriter writer = new JsonTextWriter(sw))
+                {
+                    writer.Formatting = Formatting.Indented;
+                    writer.WriteStartObject();
+                    //video+pic
+                    writer.WritePropertyName("video");
+                    if (File.Exists(SourcePath + "raw" + ".mp4") && File.Exists(SourcePath + "raw" + ".jpg"))
+                    {
+                        //建目录
+                        if (Directory.Exists(TargetPath))
+                        {
+                            if (File.Exists(TargetPath + @"raw.mp4"))
+                            {
+                                File.Delete(TargetPath + @"raw.mp4");
+                            }
+                            if (File.Exists(TargetPath + @"rip.mp4"))
+                            {
+                                File.Delete(TargetPath + @"rip.mp4");
+                            }
+                            if (File.Exists(TargetPath + @"raw.jpg"))
+                            {
+                                File.Delete(TargetPath + @"raw.jpg");
+                            }
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(TargetPath);
+                        }
+                        File.Copy(SourcePath + "raw" + ".mp4", TargetPath + "raw.mp4");
+                        writer.WriteValue("1");
+                        //pic
+                        writer.WritePropertyName("pic");
+                        File.Copy(SourcePath + "raw" + ".jpg", TargetPath + "raw.jpg");
+                        writer.WriteValue("1");
+                        //doc
+                        writer.WritePropertyName("doc");
+                        if (File.Exists(SourcePath + "slide0" + ".zip"))
+                        {
+                            if (File.Exists(TargetPath + @"slide0.zip"))
+                            {
+                                File.Delete(TargetPath + @"slide0.zip");
+                            }
+                            File.Copy(SourcePath + "slide0" + ".zip", TargetPath + "slide0.zip");
+                            writer.WriteValue("1");
+                        }
+                        else { writer.WriteValue("0"); }
+                    }
+                    else { writer.WriteValue("0"); }
+                    writer.WriteEnd();
+                    //writer.WriteEndObject();
+                }
+                result = new HttpResponseMessage(HttpStatusCode.Accepted);
+                result.Content = new StringContent(sb.ToString(), System.Text.Encoding.GetEncoding("UTF-8"), "application/json");
+            }
+            else if (value.action == "JsonBackup")
+            {
+                StringBuilder sb = new StringBuilder();
+                StringWriter sw = new StringWriter(sb);
+                using (JsonWriter writer = new JsonTextWriter(sw))
+                {
+                    writer.Formatting = Formatting.Indented;
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("json");
+                    if (File.Exists(SourcePath + "captions.json"))
+                    {
+                        try
+                        {
+                            File.Copy(SourcePath + "captions.json", SourcePath + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_") + "captions_backup.json");
+                            File.Copy(SourcePath + "captions_auto.json", SourcePath + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_") + "captions_auto_backup.json");
+                        }
+                        catch (Exception e)
+                        {
+                            result = new HttpResponseMessage(HttpStatusCode.Accepted);
+                            result.Content = new StringContent(e.ToString(), System.Text.Encoding.GetEncoding("UTF-8"), "application/json");
+                        }
+                        writer.WriteValue("1");
+                    }
+                    else { writer.WriteValue("0"); }
+                    writer.WriteEnd();
+                }
+                result = new HttpResponseMessage(HttpStatusCode.Accepted);
+                result.Content = new StringContent(sb.ToString(), System.Text.Encoding.GetEncoding("UTF-8"), "application/json");
+            }
             else if (value.action == "CourseDirectoryRename")
             {
 
